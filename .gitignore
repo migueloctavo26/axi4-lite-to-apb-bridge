@@ -1,0 +1,9 @@
+# Vivado / EDA tool build logs
+*.log
+*.jou
+*.pb
+.Xil/
+
+# OS / Editor clutter
+.DS_Store
+.vscode/
