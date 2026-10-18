@@ -6,6 +6,7 @@
 * defines needed states according to AMBA APB Specification.
 * This will also include any enum based FSM states needed.
 */
+`timescale 1ns/1ps
 
 package axi4_apb_bridge_pkg;
 

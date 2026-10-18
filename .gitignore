@@ -2,8 +2,15 @@
 *.log
 *.jou
 *.pb
+*.str
+*.wdb
+
+# Vivado sim logs / files
+xsim.dir/
 .Xil/
 
+# Vivado log/files
+*
 # OS / Editor clutter
 .DS_Store
 .vscode/
