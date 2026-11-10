@@ -7,7 +7,7 @@
 */
 `timescale 1ns/1ps
 
-import axi4_apb_bridge_pkg::*;
+import axi_to_apb_bridge_pkg::*;
 
 module apb_csr_sva (
     input logic                     pclk,
@@ -15,12 +15,12 @@ module apb_csr_sva (
     input logic [PADDR_WIDTH-1:0]   paddr,
     input logic                     penable,
     input logic                     pwrite,
-    input logic                     pwdata,
+    input logic [PDATA_WIDTH-1:0]   pwdata,
     input logic                     pselx,
     input logic                     pready,
-    input logic                     prdata,
+    input logic [PDATA_WIDTH-1:0]   prdata,
     input logic                     pslverr,
-    input logic                     pstrb,
+    input logic [PSTRB_WIDTH-1:0]   pstrb,
     input logic [PDATA_WIDTH-1:0]   status_reg
 );
     // Checks that penable remains LOW during the SETUP state and gets asserted to move into the ACCESS state.
@@ -37,7 +37,7 @@ module apb_csr_sva (
         (pselx && penable && pready) |=> !penable;
     endproperty
     enable_deassert_check_a: assert property(enable_deassert_check)
-        else $error("[SVA Fail]: penable remained high after transfer")
+        else $error("[SVA Fail]: penable remained high after transfer");
 
     // Checks that pready is HIGH during the ACCESS state.
     property zero_wait_check;
@@ -55,7 +55,7 @@ module apb_csr_sva (
     // Checks that pselx remains stable during the transaction.
     property pselx_stable_check;
         @(posedge pclk) disable iff (!prst_n)
-        (pselx && !pready) |=> pselx;
+        (pselx && (!penable || !pready)) |=> pselx;
     endproperty
     pselx_stable_check_a: assert property(pselx_stable_check)
         else $error("[SVA Fail]: pselx changed value during transaction.");
@@ -63,7 +63,7 @@ module apb_csr_sva (
     // Checks that paddr remains stable during the transaction.
     property paddr_stable_check;
         @(posedge pclk) disable iff (!prst_n)
-        (pselx && !pready) |=> $stable(paddr);
+        (pselx && (!penable || !pready)) |=> $stable(paddr);
     endproperty
     paddr_stable_check_a: assert property(paddr_stable_check)
         else $error("[SVA Fail]: paddr changed value during transaction.");
@@ -71,7 +71,7 @@ module apb_csr_sva (
     // Checks that pwrite remains stable during the transaction.
     property pwrite_stable_check;
         @(posedge pclk) disable iff (!prst_n)
-        (pselx && !pready) |=> $stable(pwrite);
+        (pselx && (!penable || !pready)) |=> $stable(pwrite);
     endproperty
     pwrite_stable_check_a: assert property(pwrite_stable_check)
         else $error("[SVA Fail]: pwrite changed during the transaction.");
@@ -79,7 +79,7 @@ module apb_csr_sva (
     // Checks that pstrb remains the same during the transaction.
     property pstrb_stable_check;
         @(posedge pclk) disable iff (!prst_n)
-        (pselx && !pready) |=> $stable(pstrb);
+        (pselx && (!penable || !pready)) |=> $stable(pstrb);
     endproperty
     pstrb_stable_check_a: assert property(pstrb_stable_check)
         else $error("[SVA Fail]: pstrb changed during the transaction.");
@@ -87,7 +87,7 @@ module apb_csr_sva (
     // Checks that pwdata does not change during a write transaction.
     property pwdata_stable_check;
         @(posedge pclk) disable iff (!prst_n)
-        (pselx && pwrite && !pready) |=> $stable(pwdata);
+        (pselx && pwrite && (!penable || !pready)) |=> $stable(pwdata);
     endproperty
     pwdata_stable_check_a: assert property(pwdata_stable_check)
         else $error("[SVA Fail]: pwdata changed during an active write transaction.");

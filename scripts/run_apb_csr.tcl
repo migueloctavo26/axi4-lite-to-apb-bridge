@@ -34,7 +34,7 @@ cd $WORK_DIR
 # 3. Compile SystemVerilog sources
 puts "\[Vivado TCL\] Compiling sources..."
 exec xvlog -sv -i $RTL_DIR \
-    "$RTL_DIR/axi4_apb_bridge_pkg.sv" \
+    "$RTL_DIR/axi_to_apb_bridge_pkg.sv" \
     "$RTL_DIR/apb_csr.sv" \
     "$SVA_DIR/apb_csr_sva.sv" \
     "$TB_DIR/apb_csr_tb.sv"

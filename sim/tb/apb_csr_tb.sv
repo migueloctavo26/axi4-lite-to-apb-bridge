@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-import axi4_apb_bridge_pkg::*;
+import axi_to_apb_bridge_pkg::*;
 
 module apb_csr_tb;
 
@@ -49,17 +49,18 @@ module apb_csr_tb;
     // SVA Bind
     // -------------------------------------------------------------------------
     bind apb_csr apb_csr_sva u_sva (
-        .pclk    (pclk),
-        .prst_n  (prst_n),
-        .paddr   (paddr),
-        .penable (penable),
-        .pwrite  (pwrite),
-        .pstrb   (pstrb),
-        .pwdata  (pwdata),
-        .pselx   (pselx),
-        .prdata  (prdata),
-        .pready  (pready),
-        .pslverr (pslverr)
+        .pclk       (pclk),
+        .prst_n     (prst_n),
+        .paddr      (paddr),
+        .penable    (penable),
+        .pwrite     (pwrite),
+        .pstrb      (pstrb),
+        .pwdata     (pwdata),
+        .pselx      (pselx),
+        .prdata     (prdata),
+        .pready     (pready),
+        .pslverr    (pslverr),
+        .status_reg (status_reg)
     );
 
     // -------------------------------------------------------------------------

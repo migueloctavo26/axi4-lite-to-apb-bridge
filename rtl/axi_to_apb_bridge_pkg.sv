@@ -1,6 +1,4 @@
 /*
-* axi4_apb_bridge_pkg.sv
-*
 * This is the package used for the whole project. It will contain
 * all parameters, including widths for all signals needed and 
 * defines needed states according to AMBA APB Specification.
@@ -8,12 +6,18 @@
 */
 `timescale 1ns/1ps
 
-package axi4_apb_bridge_pkg;
+package axi_to_apb_bridge_pkg;
+
+	// AXI4-Lite Parameters
+	parameter int  AXI_DATA_WIDTH 			= 32;
+	parameter int  AXI_ADDR_WIDTH 			= 32;
+	parameter int  AXI_STRB_WIDTH 			= AXI_DATA_WIDTH / 8;
 
 	// APB Parameters
-	parameter int PDATA_WIDTH = 32;
-	parameter int PADDR_WIDTH = 32;
-	parameter int PSTRB_WIDTH = PDATA_WIDTH / 8;
+	parameter int PDATA_WIDTH 				= 32;
+	parameter int PADDR_WIDTH				= 32;
+	parameter int PSTRB_WIDTH				= PDATA_WIDTH / 8;
+
 
 	// Memory Mapping for Control/Status Registers
 	parameter logic [PADDR_WIDTH-1:0]	CTRL_ADDR	= 'h0000_0000;
@@ -28,11 +32,13 @@ package axi4_apb_bridge_pkg;
 		APB_ACCESS
 	} apb_state_e;
 
-	// Transfer Size for PSTRB implementation
+	// RESP Labels (Will only use OKAY and SLEVERR for this design)
 	typedef enum logic [1:0] {
-		BYTE,
-		HALFWORD,
-		WORD
-	} transfer_size_e ;
+		AXI_RESP_OKAY   = 2'b00,
+		AXI_RESP_EXOKAY = 2'b01, // Will NOT be used
+		AXI_RESP_SLVERR = 2'b10,
+		AXI_RESP_DECERR = 2'b11  // Will NOT be used
+	} axi_resp_e;
 
-endpackage : axi4_apb_bridge_pkg
+
+endpackage : axi_to_apb_bridge_pkg

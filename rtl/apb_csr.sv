@@ -2,11 +2,11 @@
 * This will be a set of APB Control/Status Registers and the Completer for
 * the AXI4-lite-to-APB Bridge. The design will be implemented with no wait
 * states.
-
 */
+
 `timescale 1ns/1ps
 
-import axi4_apb_bridge_pkg::*;
+import axi_to_apb_bridge_pkg::*;
 
 module apb_csr (
 	// APB Clock and Reset
