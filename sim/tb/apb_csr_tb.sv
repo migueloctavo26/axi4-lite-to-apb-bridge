@@ -3,10 +3,6 @@
 import axi_to_apb_bridge_pkg::*;
 
 module apb_csr_tb;
-
-    // -------------------------------------------------------------------------
-    // Signals
-    // -------------------------------------------------------------------------
     logic                    pclk;
     logic                    prst_n;
     logic [PADDR_WIDTH-1:0]  paddr;
@@ -20,17 +16,13 @@ module apb_csr_tb;
     logic                    pready;
     logic                    pslverr;
 
-    // -------------------------------------------------------------------------
-    // Clock Generation (100 MHz)
-    // -------------------------------------------------------------------------
+    // Clock Gen
     initial begin
         pclk = 0;
         forever #5 pclk = ~pclk;
     end
 
-    // -------------------------------------------------------------------------
-    // DUT Instantiation
-    // -------------------------------------------------------------------------
+    // apb_csr instantiation
     apb_csr u_dut (
         .pclk    (pclk),
         .prst_n  (prst_n),
@@ -45,9 +37,7 @@ module apb_csr_tb;
         .pslverr (pslverr)
     );
 
-    // -------------------------------------------------------------------------
     // SVA Bind
-    // -------------------------------------------------------------------------
     bind apb_csr apb_csr_sva u_sva (
         .pclk       (pclk),
         .prst_n     (prst_n),
@@ -63,9 +53,6 @@ module apb_csr_tb;
         .status_reg (status_reg)
     );
 
-    // -------------------------------------------------------------------------
-    // APB Task Drivers
-    // -------------------------------------------------------------------------
     task automatic apb_write(
         input logic [PADDR_WIDTH-1:0] addr,
         input logic [PDATA_WIDTH-1:0] data,
@@ -111,9 +98,8 @@ module apb_csr_tb;
         penable <= 1'b0;
     endtask
 
-    // -------------------------------------------------------------------------
-    // Verification Suite
-    // -------------------------------------------------------------------------
+
+    // Verificaiton sim
     logic [PDATA_WIDTH-1:0] read_val;
 
     initial begin
