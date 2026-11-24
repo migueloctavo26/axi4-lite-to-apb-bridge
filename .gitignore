@@ -4,13 +4,14 @@
 *.pb
 *.str
 *.wdb
+dfx_runtime.txt
 
-# Vivado sim logs / files
+# Vivado project & sim build directories
 xsim.dir/
 .Xil/
+axi_apb_sim_proj/
+sim_work/
 
-# Vivado log/files
-*
 # OS / Editor clutter
 .DS_Store
 .vscode/

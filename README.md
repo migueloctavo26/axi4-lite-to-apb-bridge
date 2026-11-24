@@ -85,12 +85,13 @@ The design is simulated in **AMD Vivado XSim** using a directed testbench (`brid
   - **Address Decoding & Access Protection:** Confirms that accesses to unmapped addresses assert `pslverr`, and that illegal writes to the read-only `STATUS` register (`0x04`) assert `pslverr` while leaving the register value unchanged.
 
 ### Directed Test Cases
-1. **Zero-Delay Write/Read:** Baseline write and readback to `TEMP` (`0x0C`) with zero wait states.
-2. **Staggered Write Channels:** Delays `s_axi_wvalid` after `s_axi_awvalid` and delays `s_axi_bready` to verify decoupled write latching.
-3. **Backpressured Read:** Holds `s_axi_rready` low for 5 cycles to confirm `s_axi_rvalid`, `s_axi_rdata`, and `s_axi_rresp` stay stable.
-4. **Unmapped Address Write:** Writes to `0x10` and verifies `s_axi_bresp == AXI_RESP_SLVERR`.
-5. **Read-Only Register Write:** Attempts to write to `STATUS` (`0x04`) and verifies `s_axi_bresp == AXI_RESP_SLVERR`.
-6. **Back-to-Back Recovery:** Runs a normal write and read to `CTRL` (`0x00`) right after the error tests to confirm the FSM recovers cleanly.
+1. **Zero-Delay Write/Read (`TEMP` @ `0x0C`):** Baseline write and readback with zero wait states, checking `AXI_RESP_OKAY` on both channels.
+2. **Staggered Write Channels (`CONFIG` @ `0x08`):** Delays `s_axi_wvalid` by 3 cycles after `s_axi_awvalid` and delays `s_axi_bready` by 2 cycles to verify decoupled write latching.
+3. **Backpressured Read (`TEMP` @ `0x0C`):** Holds `s_axi_rready` low for 5 cycles to confirm `s_axi_rvalid`, `s_axi_rdata`, and `s_axi_rresp` stay stable.
+4. **Unmapped Address Write (`0x10`):** Writes to an unmapped address and verifies `s_axi_bresp == AXI_RESP_SLVERR`.
+5. **Unmapped Address Read (`0x10`):** Reads from an unmapped address with `s_axi_rready` delay and verifies `s_axi_rresp == AXI_RESP_SLVERR`.
+6. **Read-Only Register Write (`STATUS` @ `0x04`):** Attempts a staggered write to `STATUS`, verifies `s_axi_bresp == AXI_RESP_SLVERR`, and reads back `STATUS` to confirm its value did not change.
+7. **Back-to-Back Recovery (`CTRL` @ `0x00`):** Runs a normal write and read right after the error tests to confirm the FSM recovers cleanly with `AXI_RESP_OKAY` on both.
 
 ---
 
