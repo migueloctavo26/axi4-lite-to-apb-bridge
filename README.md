@@ -37,7 +37,7 @@ In simulation, the testbench acts as the AXI4-Lite Manager.
 ![AXI4-Lite Read Transaction](docs/AXI_Read_Transaction.png)
 
 ### APB4 Interface
-Each APB4 transfer between the Requester (bridge) and Completer (CSR) takes two clock cycles (assuming `pready = 1`):
+Each APB4 transfer between the Requester (bridge) and Completer (CSR) takes two clock cycles (assuming `pready = 1`, which it always is for this implementation):
 1. **SETUP Phase (`psel = 1`, `penable = 0`):** Drives `paddr`, `pwrite`, `pwdata`, and `pstrb` onto the bus for one cycle.
 2. **ACCESS Phase (`psel = 1`, `penable = 1`):** Holds all signals stable until `pready = 1`, then samples `prdata` and `pslverr`.
 
@@ -84,18 +84,21 @@ The design is simulated in **AMD Vivado XSim** using a directed testbench (`brid
   - **APB4 Protocol Compliance:** Verifies `SETUP`-to-`ACCESS` timing (`penable` only asserts the cycle after `psel && !penable`), checks that `paddr`, `pwrite`, `pwdata`, and `pstrb` remain stable while waiting for `pready`, and ensures `pslverr` only asserts during a valid `ACCESS` transfer (`psel && penable && pready`).
   - **Address Decoding & Access Protection:** Confirms that accesses to unmapped addresses assert `pslverr`, and that illegal writes to the read-only `STATUS` register (`0x04`) assert `pslverr` while leaving the register value unchanged.
 
-### Directed Test Cases
-1. **Zero-Delay Write/Read (`TEMP` @ `0x0C`):** Baseline write and readback with zero wait states, checking `AXI_RESP_OKAY` on both channels.
-2. **Staggered Write Channels (`CONFIG` @ `0x08`):** Delays `s_axi_wvalid` by 3 cycles after `s_axi_awvalid` and delays `s_axi_bready` by 2 cycles to verify decoupled write latching.
-3. **Backpressured Read (`TEMP` @ `0x0C`):** Holds `s_axi_rready` low for 5 cycles to confirm `s_axi_rvalid`, `s_axi_rdata`, and `s_axi_rresp` stay stable.
-4. **Unmapped Address Write (`0x10`):** Writes to an unmapped address and verifies `s_axi_bresp == AXI_RESP_SLVERR`.
-5. **Unmapped Address Read (`0x10`):** Reads from an unmapped address with `s_axi_rready` delay and verifies `s_axi_rresp == AXI_RESP_SLVERR`.
-6. **Read-Only Register Write (`STATUS` @ `0x04`):** Attempts a staggered write to `STATUS`, verifies `s_axi_bresp == AXI_RESP_SLVERR`, and reads back `STATUS` to confirm its value did not change.
-7. **Back-to-Back Recovery (`CTRL` @ `0x00`):** Runs a normal write and read right after the error tests to confirm the FSM recovers cleanly with `AXI_RESP_OKAY` on both.
 
----
+The integrated subsystem (`bridge_top`) is verified in Vivado XSim using `sim/tb/bridge_tb.sv`. The testbench uses two tasks, `axi_write` and `axi_read`, with configurable cycle delays (`w_delay`, `b_delay`, `r_delay`) to test decoupled channels and Manager-side backpressure alongside normal register transfers and error cases.
 
-## Project Structure
+**Test Cases:**
+1. **Zero-Delay Write/Read (`TEMP` @ `0x0C`):** Writes and reads back with no wait states (`w=0, b=0, r=0`) to verify basic datapath operation and `OKAY` responses.
+2. **Staggered Write (`CONFIG` @ `0x08`):** Delays `wvalid` by 3 cycles and `bready` by 2 cycles (`w=3, b=2`) to verify `awaddr` latching while waiting for write data, plus `bvalid`/`bresp` stability under backpressure.
+3. **Backpressured Read (`TEMP` @ `0x0C`):** Holds `rready` low for 5 cycles (`r=5`) to confirm `rdata` and `rresp` stay stable after the APB transfer finishes.
+4. **Unmapped Address Write (`0x10`):** Writes to an out-of-range address and checks that `pslverr` translates to `SLVERR` on `s_axi_bresp`.
+5. **Unmapped Address Read (`0x10`):** Reads from an out-of-range address (`r=2`) and checks that `pslverr` translates to `SLVERR` on `s_axi_rresp`.
+6. **Read-Only Register Write (`STATUS` @ `0x04`):** Attempts a staggered write (`w=1, b=1`) to `STATUS`, verifies `SLVERR` on the write response, and reads back `0xDEAD_BEEF` to confirm the register was not overwritten.
+7. **Error Recovery (`CTRL` @ `0x00`):** Runs a valid write and read (`r=2`) right after tests 4–6 to confirm the bridge recovers cleanly and returns `OKAY` on both transactions.
+
+
+## Project Structure: 
+
 ```text
 axi4-lite-to-apb-bridge/
 ├── docs/
