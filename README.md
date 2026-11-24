@@ -30,11 +30,11 @@ In simulation, the testbench acts as the AXI4-Lite Manager.
 
 **Write Transaction**
 
-![AXI4-Lite Write Transaction](docs/axi_write_transaction.png)
+![AXI4-Lite Write Transaction](docs/AXI_Write_Transaction.png)
 
 **Read Transaction**
 
-![AXI4-Lite Read Transaction](docs/axi_read_transaction.png)
+![AXI4-Lite Read Transaction](docs/AXI_Read_Transaction.png)
 
 ### APB4 Interface
 Each APB4 transfer between the Requester (bridge) and Completer (CSR) takes two clock cycles (assuming `pready = 1`):
